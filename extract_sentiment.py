@@ -13,3 +13,4 @@ def getSentiments(youtube, videoId):
     dataframeROBERTA, unweightedROBERTA, weightedROBERTA = roberta_calculations.get_ROBERTA_results(comments)
 
     return dataframeVADER, unweightedVADER, weightedVADER, dataframeROBERTA, unweightedROBERTA, weightedROBERTA
+

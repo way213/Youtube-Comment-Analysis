@@ -14,31 +14,54 @@ from datetime import datetime, timedelta
 # we will then store the video ID of said video, and run a sentiment calculation after a set period of time.
 
 
-# master method that gets all the current video id's in a list
-def getAllVideoIds(youtube, channelName):
-    # get the upload playlist ID
-    uploadsPlaylistId = getUploadsPlaylistId(youtube, channelName)
-    # use that ID, to retrieve all videos within it (it's a generator item)
-    videoId_gen = get_all_videoIds_in_uploadPlayList(youtube, uploadsPlaylistId)
-    old_videoId_list = []
-    for i in videoId_gen:
-        old_videoId_list.append(i)
-    return old_videoId_list
+# master method that gets all the current video ids in a set
+def getAllPlaylistItems(youtube, channelName):
+    # get the channel ID
+    channelId = getChannelId_with_SEARCH(youtube, channelName)
 
-# get the playlist Id of the 'uploads' playlist.
-def getUploadsPlaylistId(youtube, channelName):
-    request = youtube.channels().list(
-        part="contentDetails",
-        forUsername=channelName
+    # get the upload playlist ID
+    uploadsPlaylistId = getPlaylistId_with_channelId(youtube, channelId)
+
+    # use that ID, to retrieve all videos within it (it's a generator item)
+    videoId_gen = getAllVideoIds_with_uploadsPlaylistId(youtube, uploadsPlaylistId)
+
+    videoId_list = []
+    for i in videoId_gen:
+        videoId_list.append(i)
+    return videoId_list
+
+
+
+# first get the playlist Id of the 'uploads' playlist with the 'search' command - (100 quota) don't abuse this!
+def getChannelId_with_SEARCH(youtube, channelName):
+    request = youtube.search().list(
+        part="snippet",
+        channelType="any",
+        q=channelName
     )
     response = request.execute()
-    # etag field is the Channel ID
-    return response['items'][-1]['contentDetails']['relatedPlaylists']['uploads']
+    # return just the channelId
+    return response['items'][0]['snippet']['channelId']
 
-def get_videoIds_from_uploadPlayListId(youtube, uploadPlaylistId, page_token=None):
+# now get the upload playlist Id with the channelId
+def getPlaylistId_with_channelId(youtube, channelId):
+    request = youtube.channels().list(
+        part="contentDetails",
+        id=channelId
+    )
+    response = request.execute()
+    # return the playlistID
+    return response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
+# below are methods to retrieve videoId and video datetime information through the uploadsPlaylistId
+#-----------------------#-----------------------#-----------------------#-----------------------#-----------------------#-----------------------
+
+
+# retrieves video information using specific page_token.
+def get_PlaylistItems_from_uploadPlayListId(youtube, uploadPlaylistId, page_token=None):
     # request information
     request = youtube.playlistItems().list(
-        part="id",
+        part="contentDetails",
         playlistId=uploadPlaylistId,
         pageToken=page_token,
         maxResults=100,
@@ -47,16 +70,24 @@ def get_videoIds_from_uploadPlayListId(youtube, uploadPlaylistId, page_token=Non
     # put response into variable (after parsing)
     return response
 
-# method to retrieve all items in the playlist, going to next page if needed.
-# *returns lots of dicts*
-def get_all_videoIds_in_uploadPlayList(youtube, uploadPlaylistId, page_token=None):
-    payload = get_videoIds_from_uploadPlayListId(youtube, uploadPlaylistId, page_token)
+# method to retrieve all videos in a playlist, going to next page if needed.
+def getAllVideoIds_with_uploadsPlaylistId(youtube, uploadPlaylistId, page_token=None):
+    payload = get_PlaylistItems_from_uploadPlayListId(youtube, uploadPlaylistId, page_token)
     for item in payload["items"]:
-        yield item['id']  
+        yield item['contentDetails']  
 
     next_page_token = payload.get("nextPageToken")
     if next_page_token is not None:
-        yield from get_all_videoIds_in_uploadPlayList(youtube, uploadPlaylistId, next_page_token)
+        yield from getAllVideoIds_with_uploadsPlaylistId(youtube, uploadPlaylistId, next_page_token)
 
 
-def checkVideos(youtube, ):
+
+
+
+
+
+
+
+
+def checkforNewVideos(youtube, lastCheckpointVideos=set()):
+    

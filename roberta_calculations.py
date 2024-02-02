@@ -33,6 +33,7 @@ def get_ROBERTA_results(all_linked_lists):
 
 
 # Function to traverse the LinkedList and conduct sentiment analysis with ROBERTA
+# Function to traverse the LinkedList and conduct sentiment analysis with ROBERTA
 def analyze_comments_ROBERTA(linked_list):
     comments_data = []
     current = linked_list.head
@@ -42,6 +43,7 @@ def analyze_comments_ROBERTA(linked_list):
         scores = output[0][0].detach().numpy()
         scores = softmax(scores)
         items = {
+        'Comment_ID': current.comment_id,
         'Comment': current.text_original,
         'Negative': scores[0],
         'Neutral': scores[1],
@@ -52,7 +54,7 @@ def analyze_comments_ROBERTA(linked_list):
         # Traverse linked list
         current = current.next
 
-    df = pd.DataFrame(comments_data, columns=['Comment','Negative','Neutral','Positive','Like Count'])
+    df = pd.DataFrame(comments_data, columns=['Comment_ID','Comment','Negative','Neutral','Positive','Like Count'])
     return df
 
 # Define a function to calculate sentiment score for ROBERTA

@@ -28,20 +28,18 @@ def getLinkedLists(youtube, videoId):
         # create a linked list for each top-level comment
         comment_list = CommentLinkedList()
         # head node
-        head = CommentNode(top_level_comments[1], top_level_comments[2], top_level_comments[3])
+        head = CommentNode(top_level_comments[0], top_level_comments[1], top_level_comments[2], top_level_comments[3])
         comment_list.add_comment(head)
-        
         # the replies
         replies = getReplies(youtube, top_level_comments[0])
         for reply in replies:
             # make node for each comment
-            reply_node = CommentNode(reply['snippet']['textDisplay'], reply['snippet']['textOriginal'], reply['snippet']['likeCount'])
+            reply_node = CommentNode(reply['id'], reply['snippet']['textDisplay'], reply['snippet']['textOriginal'], reply['snippet']['likeCount'])
             comment_list.add_comment(reply_node)
-
         # add the completed linked list to the list
         all_linked_lists.append(comment_list)
-    
-    return all_linked_lists
+
+        return all_linked_lists
 
 def get_comment_via_videoID(youtube, videoId, pageToken=''):
     request = youtube.commentThreads().list(

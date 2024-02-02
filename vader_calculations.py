@@ -40,6 +40,7 @@ def analyze_comments_VADER(linked_list):
         scores = analyzer.polarity_scores(current.text_original)
         # Calculate non-weighted scores
         non_weighted_scores = {
+                'Comment_ID':current.comment_id,
                 'Comment': current.text_original,
                 'Negative': scores['neg'],
                 'Neutral': scores['neu'],
@@ -51,8 +52,9 @@ def analyze_comments_VADER(linked_list):
         # Traverse linked list
         current = current.next
 
-    df = pd.DataFrame(comments_data, columns=['Comment', 'Negative', 'Neutral', 'Positive', 'Sentiment', 'Like Count'])
+    df = pd.DataFrame(comments_data, columns=['Comment_ID', 'Comment', 'Negative', 'Neutral', 'Positive', 'Sentiment', 'Like Count'])
     return df
+
 
 # Define a function to multiply sentiment and like_count and return the result
 def multiply_columns(row):

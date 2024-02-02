@@ -19,7 +19,8 @@ class comment_details:
         
 # our nodes
 class CommentNode:
-    def __init__(self, text_display, text_original, like_count):
+    def __init__(self, comment_id, text_display, text_original, like_count):
+        self.comment_id = comment_id
         self.text_display = text_display
         self.text_original = text_original
         self.like_count = like_count + 1

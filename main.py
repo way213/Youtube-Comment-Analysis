@@ -18,8 +18,8 @@ def main():
         # overwrite the video we are monitoring if it changes.
         current_videoID = video_watcher.start_monitoring(youtube, current_videoID)
         dataframeVADER, unweightedVADER, weightedVADER, dataframeROBERTA, unweightedROBERTA, weightedROBERTA = getSentiments(youtube, current_videoID)
-        ##### SOME METHOD TO INSERT INTO PSQL
-        
+        ##### METHOD TO INSERT INTO PSQL
+
         time.sleep(6000) # sleep for an hour
 
 

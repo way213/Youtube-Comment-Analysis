@@ -4,7 +4,6 @@ import pandas as pd
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 from scipy.special import softmax
-from vader_calculations import multiply_columns
 
 # we will use a pre-trained model for this
 MODEL = f"cardiffnlp/twitter-roberta-base-sentiment"
@@ -61,3 +60,6 @@ def analyze_comments_ROBERTA(linked_list):
 def get_sentiment(row):
     return ((-1) * row['Negative'] + row['Positive'])
 
+# Define a function to multiply sentiment and like_count and return the result
+def multiply_columns(row):
+    return row['Sentiment'] * row['Like Count']

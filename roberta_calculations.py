@@ -12,8 +12,8 @@ model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 
 def get_ROBERTA_results(all_linked_lists):
     ROBERTA_df = pd.DataFrame()
+    print('analyzing comment thread')
     for i in range(len(all_linked_lists)):
-        print('analyzing comment thread', i)
         temp = analyze_comments_ROBERTA(all_linked_lists[i])
         ROBERTA_df = pd.concat([ROBERTA_df, temp], axis=0, ignore_index=True)
 
@@ -24,14 +24,13 @@ def get_ROBERTA_results(all_linked_lists):
 
     # now let's get the sentiment scores for ROBERTA
     ROBERTA_df['Sentiment'] = ROBERTA_df.apply(get_sentiment, axis=1)
-    unweighted_ROBERTA_result = ROBERTA_df['Sentiment'].mean()
+    unweighted_ROBERTA_result = round(ROBERTA_df['Sentiment'].mean(),3)
     ROBERTA_df['weighted_sentiment'] = ROBERTA_df.apply(multiply_columns, axis=1)
-    weighted_ROBERTA_result = ROBERTA_df['weighted_sentiment'].sum()/total_likes_in_comment_section
+    weighted_ROBERTA_result = round(ROBERTA_df['weighted_sentiment'].sum()/total_likes_in_comment_section , 2)
 
     return ROBERTA_df, unweighted_ROBERTA_result, weighted_ROBERTA_result
 
 
-# Function to traverse the LinkedList and conduct sentiment analysis with ROBERTA
 # Function to traverse the LinkedList and conduct sentiment analysis with ROBERTA
 def analyze_comments_ROBERTA(linked_list):
     comments_data = []
@@ -47,13 +46,13 @@ def analyze_comments_ROBERTA(linked_list):
         'Negative': scores[0],
         'Neutral': scores[1],
         'Positive': scores[2],
-        'Like Count': current.like_count
+        'Like_Count': current.like_count
         }
         comments_data.append(items)
         # Traverse linked list
         current = current.next
 
-    df = pd.DataFrame(comments_data, columns=['Comment_ID','Comment','Negative','Neutral','Positive','Like Count'])
+    df = pd.DataFrame(comments_data, columns=['Comment_ID','Comment','Negative','Neutral','Positive','Like_Count'])
     return df
 
 # Define a function to calculate sentiment score for ROBERTA
@@ -62,4 +61,4 @@ def get_sentiment(row):
 
 # Define a function to multiply sentiment and like_count and return the result
 def multiply_columns(row):
-    return row['Sentiment'] * row['Like Count']
+    return row['Sentiment'] * row['Like_Count']

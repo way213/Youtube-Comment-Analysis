@@ -20,7 +20,7 @@ def getLinkedLists(youtube, videoId):
             comment_details(our_response_list[i]['id'],
                             toplevelcomment['textDisplay'],
                             toplevelcomment['textOriginal'],
-                            toplevelcomment['likeCount']))
+                            int(toplevelcomment['likeCount'])))
 
     # empty list to store all the linkedlists 
     all_linked_lists = []
@@ -39,7 +39,7 @@ def getLinkedLists(youtube, videoId):
         # add the completed linked list to the list
         all_linked_lists.append(comment_list)
 
-        return all_linked_lists
+    return all_linked_lists
 
 def get_comment_via_videoID(youtube, videoId, pageToken=''):
     request = youtube.commentThreads().list(

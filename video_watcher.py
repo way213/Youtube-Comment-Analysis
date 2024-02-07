@@ -55,7 +55,9 @@ def initialize_watcher(youtube, channelName):
         print(f'Other error occurred: {err}')
     else:
         print('Retrieved most recent video ID!')
-        return videoID
+        return channelID, playlistID, videoID
+
+
 
 def start_monitoring(youtube, playlistID, current_video):
     try:
@@ -72,8 +74,10 @@ def start_monitoring(youtube, playlistID, current_video):
         print('Retrieved most recent video ID!')
     # Check if the video currently being monitored is the most recent one or not.
     if (current_video != recent_videoID): 
+        print('New video Detected...!')
         return recent_videoID
     else:
+        print('No new videos uploaded...!')
         return current_video
 
 

@@ -2,10 +2,12 @@ import configparser
 from operator import itemgetter
 import pandas as pd
 import sqlalchemy
-from sqlalchemy import DATETIME, create_engine, Column, Integer, String, DECIMAL
+from sqlalchemy import DATETIME, TIMESTAMP, create_engine, Column, Integer, String, DECIMAL, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
+
 
 # Global Base declaration
 Base = declarative_base()
@@ -34,11 +36,14 @@ class NewCommentDetails(Base):
 
 class OverallSentiments(Base):
     __tablename__ = 'average_sentiments'
-    avg_unweighted = Column(DECIMAL(4,3))    
-    avg_weighted = Column(DECIMAL(4,3))    
-    time_recorded = Column(DATETIME)
+    id = Column(Integer, primary_key=True)
+    avg_unweighted = Column(DECIMAL(6,2))    
+    avg_weighted = Column(DECIMAL(6,2))    
+    time_recorded = Column(TIMESTAMP)
 
-def initialize_connection(df):
+def initialize_connection(df, unweighted, weighted):
+    session = None  # Initialize session to None
+    engine = None  # Initialize engine to None
     try:
         # start engine
         engine = start_engine()
@@ -46,15 +51,22 @@ def initialize_connection(df):
         Base.metadata.create_all(engine)
         # create session
         session = create_session(engine)
+
         # move new comments into old checkpoint
         replace_old_with_new_comments(session)
+
         # insert into database
-        insert_dataframe(df, session)
+        insert_dataframe(session, df)
+        
+        print('completed dataframe transfer')
+        insert_calculations(session, unweighted, weighted)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred in method 'initialize_connection': {e}")
     finally:
-        session.close()
-        engine.dispose()
+        if session:
+            session.close()
+        if engine:
+            engine.dispose()
         print("Session and engine disposed.")
 
 
@@ -66,37 +78,59 @@ def start_engine():
         dsn = f'postgresql://{u}:{pw}@{host}/{db}'
         print(f'using dsn: {dsn}')
         engine = create_engine(dsn, echo=True)
+        print('Engine created!')
         return engine
     except Exception as e:
-        print('Error occured: {e}')
+        print('Error occured during engine creation: {e}')
 
 
 def create_session(engine):
     try:
         Session = sessionmaker(bind=engine)
+        print('Session created!')
         return Session()
     except Exception as e:
-        print('Error occured: {e}')
+        print('Error occured during session creation: {e}')
 
 
-def insert_dataframe(df, session):
+def insert_dataframe(session, df):
     try:
         data = df.to_dict(orient='records')
         session.bulk_insert_mappings(NewCommentDetails, data)
         session.commit()
-        print("New comments data successfully inserted into the database.")
+        print("New comment data successfully inserted into the database.")
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"An error occurred during dataframe insertion: {e}")
+
+# method to insert sentiment calculations into database
+def insert_calculations(session, unweighted, weighted):
+    try:
+        # create object to insert
+        new_record = OverallSentiments(
+            avg_unweighted=unweighted,
+            avg_weighted=weighted,
+            time_recorded=datetime.now()
+        )
+        
+        # Add the new record to the session and commit it
+        session.add(new_record)
+        session.commit()
+        print("Sentiment data successfully inserted into the database.")
     except SQLAlchemyError as e:
         session.rollback()
         print(f"An error occurred during data insertion: {e}")
+
 
 # method that transports the data in the newcomments dataframe into the odcomments dataframe
 def replace_old_with_new_comments(session):
     try:
         # Step 1: Read data from NewCommentDetails into a DataFrame
-        new_comments_df = pd.read_sql(session.query(NewCommentDetails).statement, session.bind)
+        new_comments_df = pd.read_sql(session.query(NewCommentDetails).statement, session.connection())
         
-        # Step 2: Clear OldCommentDetails table
+        # Step 2: Clear New and OldCommentDetails table
         session.query(OldCommentDetails).delete()
+        session.query(NewCommentDetails).delete()
         session.commit()
         
         # Step 3: Insert data from DataFrame into OldCommentDetails
@@ -109,5 +143,5 @@ def replace_old_with_new_comments(session):
             print("No data found in NewCommentDetails to move.")
 
     except SQLAlchemyError as e:
-        session.rollback()  # Rollback the changes on error
         print(f"An error occurred during the replacement process: {e}")
+        session.rollback()  # Rollback the changes on error

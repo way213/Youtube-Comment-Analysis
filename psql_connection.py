@@ -127,7 +127,8 @@ def replace_old_with_new_comments(session):
     try:
         # Step 1: Read data from NewCommentDetails into a DataFrame
         new_comments_df = pd.read_sql(session.query(NewCommentDetails).statement, session.connection())
-        
+        print('HERE IS THE DATAFRAM:', new_comments_df)
+
         # Step 2: Clear New and OldCommentDetails table
         session.query(OldCommentDetails).delete()
         session.query(NewCommentDetails).delete()

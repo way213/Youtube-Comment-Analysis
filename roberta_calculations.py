@@ -40,6 +40,8 @@ def analyze_comments_ROBERTA(linked_list):
         output = model(**encoded_text)
         scores = output[0][0].detach().numpy()
         scores = softmax(scores)
+        # Round the scores to 4 decimal places
+        scores = np.round(scores, 4)
         items = {
         'Comment_ID': current.comment_id,
         'Comment': current.text_original,

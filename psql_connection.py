@@ -37,11 +37,12 @@ class NewCommentDetails(Base):
 class OverallSentiments(Base):
     __tablename__ = 'average_sentiments'
     id = Column(Integer, primary_key=True)
+    title = Column(String)
     avg_unweighted = Column(DECIMAL(6,2))    
     avg_weighted = Column(DECIMAL(6,2))    
     time_recorded = Column(TIMESTAMP)
 
-def initialize_connection(df, unweighted, weighted):
+def initialize_connection(df, unweighted, weighted, video_title):
     session = None  # Initialize session to None
     engine = None  # Initialize engine to None
     try:
@@ -59,7 +60,7 @@ def initialize_connection(df, unweighted, weighted):
         insert_dataframe(session, df)
         
         print('completed dataframe transfer')
-        insert_calculations(session, unweighted, weighted)
+        insert_calculations(session, unweighted, weighted, video_title)
     except Exception as e:
         print(f"An error occurred in method 'initialize_connection': {e}")
     finally:
@@ -104,10 +105,11 @@ def insert_dataframe(session, df):
         print(f"An error occurred during dataframe insertion: {e}")
 
 # method to insert sentiment calculations into database
-def insert_calculations(session, unweighted, weighted):
+def insert_calculations(session, unweighted, weighted, video_title):
     try:
         # create object to insert
         new_record = OverallSentiments(
+            title=video_title,
             avg_unweighted=unweighted,
             avg_weighted=weighted,
             time_recorded=datetime.now()
@@ -119,7 +121,7 @@ def insert_calculations(session, unweighted, weighted):
         print("Sentiment data successfully inserted into the database.")
     except SQLAlchemyError as e:
         session.rollback()
-        print(f"An error occurred during data insertion: {e}")
+        print(f"An error occurred during data insertion for new calculations: {e}")
 
 
 # method that transports the data in the newcomments dataframe into the odcomments dataframe
@@ -127,7 +129,6 @@ def replace_old_with_new_comments(session):
     try:
         # Step 1: Read data from NewCommentDetails into a DataFrame
         new_comments_df = pd.read_sql(session.query(NewCommentDetails).statement, session.connection())
-        print('HERE IS THE DATAFRAM:', new_comments_df)
 
         # Step 2: Clear New and OldCommentDetails table
         session.query(OldCommentDetails).delete()

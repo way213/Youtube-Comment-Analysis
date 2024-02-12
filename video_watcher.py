@@ -44,7 +44,7 @@ def initialize_watcher(youtube, channelName):
         print('Retrieved Upload Playlist ID!')
     
     try:
-        videoID = get_most_recent_video(youtube, playlistID)
+        videoID, videoTitle = get_most_recent_video(youtube, playlistID)
     except HTTPError as http_err:
     # Check if the error is a 403 Client Error and contains 'quotaExceeded'
         if http_err.response.status_code == 403:
@@ -55,13 +55,13 @@ def initialize_watcher(youtube, channelName):
         print(f'Other error occurred: {err}')
     else:
         print('Retrieved most recent video ID!')
-        return channelID, playlistID, videoID
+        return channelID, playlistID, videoID, videoTitle
 
 
 
-def start_monitoring(youtube, playlistID, current_video):
+def start_monitoring(youtube, playlistID, current_videoID):
     try:
-        recent_videoID = get_most_recent_video(youtube, playlistID)
+        recent_videoID, recent_videoTitle = get_most_recent_video(youtube, playlistID)
     except HTTPError as http_err:
     # Check if the error is a 403 Client Error and contains 'quotaExceeded'
         if http_err.response.status_code == 403:
@@ -73,12 +73,12 @@ def start_monitoring(youtube, playlistID, current_video):
     else:
         print('Retrieved most recent video ID!')
     # Check if the video currently being monitored is the most recent one or not.
-    if (current_video != recent_videoID): 
+    if (current_videoID != recent_videoID): 
         print('New video Detected...!')
-        return recent_videoID
+        return recent_videoID, recent_videoTitle
     else:
         print('No new videos uploaded...!')
-        return current_video
+        return recent_videoID, recent_videoTitle
 
 
 
@@ -109,14 +109,14 @@ def getPlaylistId_with_channelId(youtube, channelId):
 def get_most_recent_video(youtube, uploadPlaylistId, page_token=None):
     # request information
     request = youtube.playlistItems().list(
-        part="contentDetails",
+        part="contentDetails,snippet",
         playlistId=uploadPlaylistId,
         pageToken=page_token,
         maxResults=1,
     )
     response = request.execute()
-    # return the videoId
-    return response['items'][0]['contentDetails']['videoId']
+    # return the videoId, and the title of the video
+    return response['items'][0]['contentDetails']['videoId'], response['items'][0]['snippet']['title']
 
 
 

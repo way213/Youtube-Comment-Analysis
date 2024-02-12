@@ -5,13 +5,12 @@ import pandas as pd
 items = {
     'Comment_ID': ['UgzDJMB_cbxsFiHK9pV4AaABAg'], 
     'Comment': ['This is fantastic'], 
-    'Negative': [0.002422720892354846], 
-    'Neutral': [0.014200986362993717], 
-    'Positive': [0.9833763241767883],  
+    'Negative': [0.002], 
+    'Neutral': [0.014], 
+    'Positive': [0.983],  
     'Like_Count': [22],  # Adjusted key name here to match
-    'Sentiment': [0.9809536032844335],
-    'weighted_sentiment': [0.9809536032844335]
-
+    'Sentiment': [0.980],
+    'weighted_sentiment': [0.980]
 }
 
 # No need to specify columns if they match the dictionary keys

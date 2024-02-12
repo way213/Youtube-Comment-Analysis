@@ -21,14 +21,14 @@ def main():
     youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = youtube_api_key)
 
     # initialize the watcher and videoID we are tracking
-    current_channelID, current_playlistID, current_videoID = video_watcher.initialize_watcher(youtube, 'neetcode')
+    current_channelID, current_playlistID, current_videoID, current_videoTitle = video_watcher.initialize_watcher(youtube, 'neetcode')
 
 
     print('start monitoring')
 
     while(True):
         # overwrite the videoID we are monitoring if it changes.
-        current_videoID = video_watcher.start_monitoring(youtube, current_playlistID, current_videoID)
+        current_videoID, current_videoTitle = video_watcher.start_monitoring(youtube, current_playlistID, current_videoID)
         
         print('Calculating new sentiments...')
         dataframeROBERTA, unweightedROBERTA, weightedROBERTA = getSentiments(youtube, current_videoID)
@@ -36,7 +36,7 @@ def main():
 
         # now insert the NEW DATA into PSQL connection, also moved old data into the old dataframe
         print('Inserting new values into database')
-        initialize_connection(dataframeROBERTA, unweightedROBERTA, weightedROBERTA)
+        initialize_connection(dataframeROBERTA, unweightedROBERTA, weightedROBERTA, current_videoTitle)
         print('Going to sleep... see you in 10 mins!\n')
         time.sleep(600) # sleep for ten mins
 

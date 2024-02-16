@@ -1,4 +1,4 @@
-# Video Comment Sentiment Analysis
+# Youtube Comment Sentiment Analysis
 
 ## Project Overview
 

@@ -13,29 +13,33 @@ from datetime import datetime
 Base = declarative_base()
 
 class OldCommentDetails(Base):
-    __tablename__ = 'old_results'
-    Comment_ID = Column(String, primary_key=True)
-    Comment = Column(String)
-    Negative = Column(DECIMAL(4,3))
-    Neutral = Column(DECIMAL(4,3))
-    Positive = Column(DECIMAL(4,3))    
-    Like_Count = Column(Integer)
-    Sentiment = Column(DECIMAL(4,3))    
+    __tablename__ = 'old_comments'
+    comment_id = Column(String, primary_key=True)
+    comment = Column(String)
+    negative = Column(DECIMAL(4,3))
+    neutral = Column(DECIMAL(4,3))
+    positive = Column(DECIMAL(4,3))    
+    like_count = Column(Integer)
+    sentiment = Column(DECIMAL(4,3))    
     weighted_sentiment = Column(DECIMAL(6,3))
+    worded_sentiment = Column(String)
+
 
 class NewCommentDetails(Base):
-    __tablename__ = 'new_results'
-    Comment_ID = Column(String, primary_key=True)
-    Comment = Column(String)
-    Negative = Column(DECIMAL(4,3))
-    Neutral = Column(DECIMAL(4,3))
-    Positive = Column(DECIMAL(4,3))    
-    Like_Count = Column(Integer)
-    Sentiment = Column(DECIMAL(4,3))    
+    __tablename__ = 'new_comments'
+    comment_id = Column(String, primary_key=True)
+    comment = Column(String)
+    negative = Column(DECIMAL(4,3))
+    neutral = Column(DECIMAL(4,3))
+    positive = Column(DECIMAL(4,3))    
+    like_count = Column(Integer)
+    sentiment = Column(DECIMAL(4,3))    
     weighted_sentiment = Column(DECIMAL(6,3))
+    worded_sentiment = Column(String)
+
 
 class OverallSentiments(Base):
-    __tablename__ = 'average_sentiments'
+    __tablename__ = 'sentiment_calculations'
     id = Column(Integer, primary_key=True)
     title = Column(String)
     avg_unweighted = Column(DECIMAL(6,2))    

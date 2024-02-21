@@ -11,7 +11,8 @@ This project aims to analyze sentiment from comments on video content, focusing 
 - **Database Storage:** Efficient storage of channels, videos, comments, sentiment analysis results, and fetch iterations in a structured database.
 - **Dynamic Updates:** The database is designed to accommodate new comments and videos, ensuring the analysis is up-to-date with the latest viewer interactions.
 
-## Database Design
+------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)------------- (WORK IN PROGRESS)
+## Database Design 
 
 The database is structured to normalize the data and reduce redundancy, organized into the following tables:
 
